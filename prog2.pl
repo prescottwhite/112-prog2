@@ -2,6 +2,7 @@
 % Instructor: Charlie McDowell
 % Student: Prescott White, prgwhite@ucsc.edu
 
+
 airport( atl, 'Atlanta         ', degmin(  33,39 ), degmin(  84,25 ) ).
 airport( bos, 'Boston-Logan    ', degmin(  42,22 ), degmin(  71, 2 ) ).
 airport( chi, 'Chicago         ', degmin(  42, 0 ), degmin(  87,53 ) ).
@@ -60,13 +61,15 @@ flight( lax, sjc, time( 19,30 ) ).
 flight( lax, sfo, time( 20, 0 ) ).
 flight( lax, sea, time( 22,30 ) ).
 
+
 % FINDING FLIGHTS
 % fly(A, B) :- flight(A, B, time(Th, Tm)), buildTrip(A, B, Th, Tm).
 % fly(A, B) :- flight(A, X, time(Th, Tm)), buildTrip(A, X, Th, Tm), fly(X, B).
 
-fly(A, B) :- flyH(A, B, 0, 0).
-flyH(A, B, H, M) :- flight(A, B, time(Th, Tm)), later30(H, M, Th, Tm, Check), Check == 1, buildTrip(A, B, Th, Tm).
-flyH(A, B, H, M) :- flight(A, X, time(Th, Tm)), getArrival(A, X, Th, Tm, ThA, TmA), later30(H, M, ThA, TmA, Check), Check == 1, buildTrip(A, X, Th, Tm), flyH(X, B, ThA, TmA).
+fly(A, B) :- A \= B, flyH(A, B, 0, 0).
+% fly(_, _)
+flyH(A, B, H, M) :- flight(A, B, time(Th, Tm)), later30(H, M, Th, Tm), buildTrip(A, B, Th, Tm).
+flyH(A, C, H, M) :- flight(A, X, time(Th, Tm)), getArrival(A, X, Th, Tm, ThA, TmA), later30(H, M, ThA, TmA), flyH(X, C, ThA, TmA).
 
 
 % DISTANCE CALCULATIONS
@@ -92,9 +95,9 @@ getArrival(City1, City2, H, M, ResultH, ResultM) :- getDist(City1, City2, Miles)
 getArrivalH(H, M, Miles, ResultH, ResultM) :- getTime(Miles, ResultMins),
 	ResultH is H + floor(ResultMins / 60) + floor((M + (ResultMins mod 60)) / 60),
 	ResultM is (M + (ResultMins mod 60)) mod 60.
-	
-later30(H1, M1, H2, M2, Result) :- ((H2*60) + M2) >= (((H1*60) + M1) + 30), Result is 1.
-later30(H1, M1, H2, M2, Result) :- ((H2*60) + M2) < (((H1*60) + M1) + 30), Result is 0.
+
+later30(H1, M1, _, _) :- H1 == 0, M1 == 0.
+later30(H1, M1, H2, M2) :- ((H2*60) + M2) >= (((H1*60) + M1) + 30).
 
 	
 % TRIP PRINTING
@@ -108,11 +111,15 @@ print_trip( Action, Code, Name, time( Hour, Minute)) :-
 	upcase_atom( Code, Upper_code),   format( "~6s  ~3s  ~s~26|  ~`0t~d~30|:~`0t~d~33|",
 		[Action, Upper_code, Name, Hour, Minute]),
 		nl.
-		
+	
+	
+% PROVIDED
 test :-
    print_trip( depart, nyc, 'New York City', time( 9, 3)),
    print_trip( arrive, lax, 'Los Angeles', time( 14, 22)).
 
 doSomething(nyc,lax) :- test.
 
-main :- read(A),read(B), doSomething(A,B).
+
+% MAIN
+main :- read(A),read(B), fly(A,B).
