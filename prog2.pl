@@ -61,14 +61,14 @@ flight( lax, sfo, time( 20, 0 ) ).
 flight( lax, sea, time( 22,30 ) ).
 
 fly(A, B) :- flight(A, B, _).
+fly(A, B) :- flight(A, X, _), fly(X, B).
 
 
-print_trip( Action, Code, Name, time( Hour, Minute)) :-
-   upcase_atom( Code, Upper_code),
-   format( "~6s  ~3s  ~s~26|  ~02d:~02d",
-           [Action, Upper_code, Name, Hour, Minute]),
-   nl.
-
+print_trip( Action, Code, Name, time( Hour, Minute)) :- 
+	upcase_atom( Code, Upper_code),   format( "~6s  ~3s  ~s~26|  ~`0t~d~30|:~`0t~d~33|",
+		[Action, Upper_code, Name, Hour, Minute]),
+		nl.
+		
 test :-
    print_trip( depart, nyc, 'New York City', time( 9, 3)),
    print_trip( arrive, lax, 'Los Angeles', time( 14, 22)).
