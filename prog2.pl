@@ -63,6 +63,7 @@ flight( lax, sea, time( 22,30 ) ).
 fly(A, B) :- flight(A, B, _).
 fly(A, B) :- flight(A, X, _), fly(X, B).
 
+
 % DISTANCE CALCULATIONS
 getRads(Deg, Min, Result) :- Result is (Deg + (Min / 60)) * (pi/180).
 
@@ -78,11 +79,13 @@ getDistH(DegX1, MinX1, DegY1, MinY1, DegX2, MinX2, DegY2, MinY2, Result) :- getR
 		sqrt(1 - ((sin((Lat2 - Lat1)/2))^2 + cos(Lat1) * cos(Lat2) * (sin((Lon2 - Lon1)/2))^2)))).
 
 % TIME CALCULATIONS
-getTime(Miles, ResultMins) :- Result is 60 * (Miles / 500).
+getTime(Miles, ResultMins) :- ResultMins is round(60 * (Miles / 500)).
 
-%getArrival(H, M, Miles, ResultH, ResultM) :- getTime(Miles, ResultMins),
-	%(ResultMins mod 60)
-		
+getArrival(H, M, Miles, ResultH, ResultM) :- getTime(Miles, ResultMins),
+	ResultH is H + floor(ResultMins / 60) + floor((M + (ResultMins mod 60)) / 60),
+	ResultM is (M + (ResultMins mod 60)) mod 60.
+
+	
 print_trip( Action, Code, Name, time( Hour, Minute)) :- 
 	upcase_atom( Code, Upper_code),   format( "~6s  ~3s  ~s~26|  ~`0t~d~30|:~`0t~d~33|",
 		[Action, Upper_code, Name, Hour, Minute]),
