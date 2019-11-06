@@ -60,8 +60,13 @@ flight( lax, sjc, time( 19,30 ) ).
 flight( lax, sfo, time( 20, 0 ) ).
 flight( lax, sea, time( 22,30 ) ).
 
-fly(A, B) :- flight(A, B, _).
-fly(A, B) :- flight(A, X, _), fly(X, B).
+% FINDING FLIGHTS
+% fly(A, B) :- flight(A, B, time(Th, Tm)), buildTrip(A, B, Th, Tm).
+% fly(A, B) :- flight(A, X, time(Th, Tm)), buildTrip(A, X, Th, Tm), fly(X, B).
+
+fly(A, B) :- flyH(A, B, 0, 0).
+flyH(A, B, H, M) :- flight(A, B, time(Th, Tm)), later30(H, M, Th, Tm, Check), Check == 1, buildTrip(A, B, Th, Tm).
+flyH(A, B, H, M) :- flight(A, X, time(Th, Tm)), getArrival(A, X, Th, Tm, ThA, TmA), later30(H, M, ThA, TmA, Check), Check == 1, buildTrip(A, X, Th, Tm), flyH(X, B, ThA, TmA).
 
 
 % DISTANCE CALCULATIONS
@@ -78,13 +83,26 @@ getDistH(DegX1, MinX1, DegY1, MinY1, DegX2, MinX2, DegY2, MinY2, Result) :- getR
 	Result is 3956 * (2 * atan2(sqrt(((sin((Lat2 - Lat1)/2))^2 + (cos(Lat1) * cos(Lat2) * (sin((Lon2 - Lon1)/2))^2))),
 		sqrt(1 - ((sin((Lat2 - Lat1)/2))^2 + cos(Lat1) * cos(Lat2) * (sin((Lon2 - Lon1)/2))^2)))).
 
+
 % TIME CALCULATIONS
 getTime(Miles, ResultMins) :- ResultMins is round(60 * (Miles / 500)).
 
-getArrival(H, M, Miles, ResultH, ResultM) :- getTime(Miles, ResultMins),
+getArrival(City1, City2, H, M, ResultH, ResultM) :- getDist(City1, City2, Miles), getArrivalH(H, M, Miles, ResultH, ResultM).
+
+getArrivalH(H, M, Miles, ResultH, ResultM) :- getTime(Miles, ResultMins),
 	ResultH is H + floor(ResultMins / 60) + floor((M + (ResultMins mod 60)) / 60),
 	ResultM is (M + (ResultMins mod 60)) mod 60.
+	
+later30(H1, M1, H2, M2, Result) :- ((H2*60) + M2) >= (((H1*60) + M1) + 30), Result is 1.
+later30(H1, M1, H2, M2, Result) :- ((H2*60) + M2) < (((H1*60) + M1) + 30), Result is 0.
 
+	
+% TRIP PRINTING
+buildTrip(CityA, CityB, H, M) :- getArrival(CityA, CityB, H, M, ResultH, ResultM),
+	airport(CityA, NameA, _, _),
+	airport(CityB, NameB, _, _),
+	print_trip(depart, CityA, NameA, time(H, M)),
+	print_trip(arrive, CityB, NameB, time(ResultH, ResultM)).
 	
 print_trip( Action, Code, Name, time( Hour, Minute)) :- 
 	upcase_atom( Code, Upper_code),   format( "~6s  ~3s  ~s~26|  ~`0t~d~30|:~`0t~d~33|",
