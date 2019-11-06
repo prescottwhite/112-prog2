@@ -63,26 +63,20 @@ flight( lax, sea, time( 22,30 ) ).
 fly(A, B) :- flight(A, B, _).
 fly(A, B) :- flight(A, X, _), fly(X, B).
 
-
-%  dlon = lon2 - lon1
-%  dlat = lat2 - lat1
-%  a = (sin(dlat/2))^2 + cos(lat1) * cos(lat2) * (sin(dlon/2))^2
-%  c = 2 * atan2(sqrt(a), sqrt(1-a))
-%  d = R * c
-
+% DISTANCE CALCULATIONS
 getRads(Deg, Min, Result) :- Result is (Deg + (Min / 60)) * (pi/180).
 
-dLon(Lon2, Lon1, Result) :- Result is Lon2 - Lon1.
-dLat(Lat2, Lat1, Result) :- Result is Lat2 - Lat1.
-getA(Dlon, Dlat, Lat2, Lat1, Result) :- Result is (sin(Dlat/2))^2 + cos(Lat1) * cos(Lat2) * (sin(Dlon/2))^2.
-getC(A, Result) :- Result is 2 * atan2(sqrt(A), sqrt(1 - A)).
-getD(C, Result) :- Result is 3956 * C.
-
-getDist(DegX1, MinX1, DegY1, MinY1, DegX2, MinX2, DegY2, MinY2, Result) :- getRads(DegX2, MinX2, Lat2),
+getDist(City1, City2, Result) :- airport(City1, _, degmin(DegX1, MinX1), degmin(DegY1, MinY1)),
+	airport(City2, _, degmin(DegX2, MinX2), degmin(DegY2, MinY2)),
+	getDistH(DegX1, MinX1, DegY1, MinY1, DegX2, MinX2, DegY2, MinY2, Result).
+	
+getDistH(DegX1, MinX1, DegY1, MinY1, DegX2, MinX2, DegY2, MinY2, Result) :- getRads(DegX2, MinX2, Lat2),
 	getRads(DegX1, MinX1, Lat1),
 	getRads(DegY2, MinY2, Lon2),
 	getRads(DegY1, MinY1, Lon1),
-	Result is 3956 * (2 * atan2(sqrt(((sin((Lat2 - Lat1)/2))^2 + (cos(Lat1) * cos(Lat2) * (sin((Lon2 - Lon1)/2))^2))), sqrt(1 - ((sin((Lat2 - Lat1)/2))^2 + cos(Lat1) * cos(Lat2) * (sin((Lon2 - Lon1)/2))^2)))).
+	Result is 3956 * (2 * atan2(sqrt(((sin((Lat2 - Lat1)/2))^2 + (cos(Lat1) * cos(Lat2) * (sin((Lon2 - Lon1)/2))^2))),
+		sqrt(1 - ((sin((Lat2 - Lat1)/2))^2 + cos(Lat1) * cos(Lat2) * (sin((Lon2 - Lon1)/2))^2)))).
+
 
 print_trip( Action, Code, Name, time( Hour, Minute)) :- 
 	upcase_atom( Code, Upper_code),   format( "~6s  ~3s  ~s~26|  ~`0t~d~30|:~`0t~d~33|",
