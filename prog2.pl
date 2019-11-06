@@ -82,7 +82,7 @@ getDist(DegX1, MinX1, DegY1, MinY1, DegX2, MinX2, DegY2, MinY2, Result) :- getRa
 	getRads(DegX1, MinX1, Lat1),
 	getRads(DegY2, MinY2, Lon2),
 	getRads(DegY1, MinY1, Lon1),
-	Result is 3956 * 2 * atan2(sqrt((sin(Lat2 - Lat1/2))^2 + cos(Lat1) * cos(Lat2) * (sin(Lon2 - Lon1/2))^2), sqrt(1 - (sin(Lat2 - Lat1/2))^2 + cos(Lat1) * cos(Lat2) * (sin(Lon2 - Lon1/2))^2)).
+	Result is 3956 * (2 * atan2(sqrt(((sin((Lat2 - Lat1)/2))^2 + (cos(Lat1) * cos(Lat2) * (sin((Lon2 - Lon1)/2))^2))), sqrt(1 - ((sin((Lat2 - Lat1)/2))^2 + cos(Lat1) * cos(Lat2) * (sin((Lon2 - Lon1)/2))^2)))).
 
 print_trip( Action, Code, Name, time( Hour, Minute)) :- 
 	upcase_atom( Code, Upper_code),   format( "~6s  ~3s  ~s~26|  ~`0t~d~30|:~`0t~d~33|",
