@@ -1,7 +1,6 @@
 % Program 2 - Airline Reservation System
 % Instructor: Charlie McDowell
 % Student: Prescott White, prgwhite@ucsc.edu
-:- use_module(library(lists)).
 
 
 airport( atl, 'Atlanta         ', degmin(  33,39 ), degmin(  84,25 ) ).
