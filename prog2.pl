@@ -63,12 +63,17 @@ flight( lax, sea, time( 22,30 ) ).
 
 
 % FINDING FLIGHTS
-% fly(A, B) :- flight(A, B, time(Th, Tm)), buildTrip(A, B, Th, Tm).
-% fly(A, B) :- flight(A, X, time(Th, Tm)), fly(X, B).
-
-fly(A, B) :- A \= B, flyH(A, B, 0, 0, _, _, _, _).
-flyH(A, B, H, M, Ax, Bx, Hx, Mx) :- flight(A, B, time(Th, Tm)), later30(H, M, Th, Tm), buildTrip(Ax, Bx, Hx, Mx), buildTrip(A, B, Th, Tm).
-flyH(A, C, H, M, _, _, _, _) :- flight(A, X, time(Th, Tm)), getArrival(A, X, Th, Tm, ThA, TmA), later30(H, M, ThA, TmA), flyH(X, C, ThA, TmA, A, X, Th, Tm).
+fly(A, B) :- A \= B,
+	flyH(A, B, 0, 0).
+	
+flyH(A, B, H, M) :- flight(A, B, time(Th, Tm)),
+	later30(H, M, Th, Tm),
+	buildTrip(A, B, Th, Tm).
+	
+flyH(A, C, H, M) :- flight(A, X, time(Th, Tm)),
+	getArrival(A, X, Th, Tm, ThA, TmA),
+	later30(H, M, ThA, TmA),
+	flyH(X, C, ThA, TmA).
 
 
 % DISTANCE CALCULATIONS
