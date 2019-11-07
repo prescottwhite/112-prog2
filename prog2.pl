@@ -73,7 +73,9 @@ flyHelper(From, To, PrevHr, PrevMin) :- flight(From, To, time(DepartHr, DepartM)
 flyHelper(From, To, PrevHr, PrevMin) :- flight(From, X, time(DepartHr, DepartM)),
 	getArrival(From, X, DepartHr, DepartM, ArriveHr, ArriveM),
 	later30(PrevHr, PrevMin, DepartHr, DepartM),
-	flyHelper(X, To, ArriveHr, ArriveM).
+	flyHelper(X, To, ArriveHr, ArriveM),
+	!,
+	buildTrip(From, X, DepartHr, DepartM).
 
 
 % DISTANCE CALCULATIONS
