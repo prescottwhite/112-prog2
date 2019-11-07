@@ -1,6 +1,7 @@
 % Program 2 - Airline Reservation System
 % Instructor: Charlie McDowell
 % Student: Prescott White, prgwhite@ucsc.edu
+:- use_module(library(lists)).
 
 
 airport( atl, 'Atlanta         ', degmin(  33,39 ), degmin(  84,25 ) ).
@@ -64,18 +65,18 @@ flight( lax, sea, time( 22,30 ) ).
 
 % FINDING FLIGHTS
 fly(A, B) :- A \= B,
-	flyHelper(A, B, 0, 0).
+	flyHelper(A, B, 0, 0, []).
 	
-flyHelper(From, To, PrevHr, PrevMin) :- flight(From, To, time(DepartHr, DepartM)),
+flyHelper(From, To, PrevHr, PrevMin, L) :- flight(From, To, time(DepartHr, DepartM)),
 	later30(PrevHr, PrevMin, DepartHr, DepartM),
-	buildTrip(From, To, DepartHr, DepartM).
+	append(L, [From, To, DepartHr, DepartM], List),
+	buildTrip(List).
 	
-flyHelper(From, To, PrevHr, PrevMin) :- flight(From, X, time(DepartHr, DepartM)),
+flyHelper(From, To, PrevHr, PrevMin, L) :- flight(From, X, time(DepartHr, DepartM)),
 	getArrival(From, X, DepartHr, DepartM, ArriveHr, ArriveM),
 	later30(PrevHr, PrevMin, DepartHr, DepartM),
-	flyHelper(X, To, ArriveHr, ArriveM),
-	!,
-	buildTrip(From, X, DepartHr, DepartM).
+	append(L, [From, X, DepartHr, DepartM], List),
+	flyHelper(X, To, ArriveHr, ArriveM, List).
 
 
 % DISTANCE CALCULATIONS
@@ -107,11 +108,17 @@ later30(H1, M1, H2, M2) :- ((H2*60) + M2) >= (((H1*60) + M1) + 30).
 
 	
 % TRIP PRINTING
-buildTrip(CityA, CityB, H, M) :- getArrival(CityA, CityB, H, M, ResultH, ResultM),
+buildTrip([]).
+buildTrip([CityA, CityB, H, M|LS]) :- buildTripHelper(CityA, CityB, H, M),
+	buildTrip(LS).
+
+buildTripHelper(CityA, CityB, H, M) :- getArrival(CityA, CityB, H, M, ResultH, ResultM),
 	airport(CityA, NameA, _, _),
 	airport(CityB, NameB, _, _),
 	print_trip(depart, CityA, NameA, time(H, M)),
 	print_trip(arrive, CityB, NameB, time(ResultH, ResultM)).
+	
+
 	
 print_trip( Action, Code, Name, time( Hour, Minute)) :- 
 	upcase_atom( Code, Upper_code),   format( "~6s  ~3s  ~s~26|  ~`0t~d~30|:~`0t~d~33|",
